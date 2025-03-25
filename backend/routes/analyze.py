@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from flask.utils.pdf_utils import extract_text_from_pdfs
-from flask.utils.openai_utils import extract_expense_json
+from utils.openai_utils import extract_expense_json
+from utils.pdf_utils import extract_text_from_pdfs
 
 analyze_bp = Blueprint("analyze", __name__)
 

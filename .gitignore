@@ -1,1 +1,61 @@
-.env
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.so
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# Environments
+env/
+venv/
+ENV/
+.venv/
+.Python
+pip-selfcheck.json
+
+# Streamlit
+.streamlit/config.toml
+.streamlit/*.toml
+.streamlit/*.json
+.streamlit/*.yaml
+
+# Flask cache and session data
+instance/
+*.db
+*.sqlite3
+
+# VSCode
+.vscode/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+
+# Pytest and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.cache/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pylint
+.pylint.d/
+
+# Build files
+build/
+dist/
+*.egg-info/
+.eggs/

@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from flask.utils.openai_utils import get_summary_and_advice, ask_followup_question
+from utils.openai_utils import get_summary_and_advice, ask_followup_question
 
 advice_bp = Blueprint("advice", __name__)
 
