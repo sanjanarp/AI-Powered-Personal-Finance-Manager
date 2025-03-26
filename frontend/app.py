@@ -10,7 +10,7 @@ st.set_page_config(page_title="AI Finance Manager", layout="centered")
 st.title("📊 AI-Powered Personal Finance Manager")
 
 # Define your Flask backend base URL
-BACKEND_URL = "http://localhost:5000"
+BACKEND_URL = "http://localhost:5050"
 
 api_key = st.text_input("Enter your OpenAI API Key:", type="password")
 
@@ -26,28 +26,28 @@ expense_data = {}
 if st.button("Analyze Statements") and uploaded_files and api_key:
     with st.spinner("Analyzing statements via backend..."):
         try:
-            # Prepare files for backend upload
-            files = [("files", (f.name, f, "application/pdf")) for f in uploaded_files]
-            data = {"api_key": api_key}
 
             # Step 1: Get financial advice summary
             # First, extract text from PDFs for the summary
-            text_content = ""
-            for file in uploaded_files:
-                text_content += file.read().decode("latin-1") + "\n"
-                file.seek(0)  # reset file pointer
+            # Prepare files and API key (just once)
+            files = [("files", (f.name, f, "application/pdf")) for f in uploaded_files]
+            data = {"api_key": api_key}
 
+            # 🧠 Call backend for financial advice (PDF gets parsed server-side now)
             summary_res = requests.post(
-                f"{BACKEND_URL}/advice/summary", data={"api_key": api_key, "text": text_content}
+                f"{BACKEND_URL}/advice/summary",
+                files=files,
+                data=data
             )
 
             if summary_res.status_code == 200:
                 summary = summary_res.json()["summary"]
                 st.subheader("📋 Financial Summary and Advice")
-                st.text_area("Summary", summary, height=300)
+                st.text_area("Summary", summary, height=300, key="summary_text")
             else:
                 st.warning("Failed to get financial advice summary.")
-                st.text_area("Backend Message", summary_res.text, height=150)
+                st.text_area("Backend Message", summary_res.text, height=150, key="summary_error_text")
+
 
             # Step 2: Get categorized expenses
             response = requests.post(f"{BACKEND_URL}/analyze/", files=files, data=data)
@@ -56,7 +56,7 @@ if st.button("Analyze Statements") and uploaded_files and api_key:
                 expense_data = response.json()
             else:
                 st.warning("Failed to extract expenses.")
-                st.text_area("Backend Message", response.text, height=150)
+                st.text_area("Backend Message", response.text, height=150, key="response_text")
 
         except Exception as e:
             st.error(f"Error: {str(e)}")
