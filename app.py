@@ -1,4 +1,48 @@
 # app.py (Streamlit Version with Custom Pie Chart, Total, CSV Download, and Financial Advice Display)
+"""
+AI-Powered Personal Finance Manager (Streamlit Application)
+This Streamlit application allows users to upload bank statement PDFs, analyze their financial data, 
+and receive categorized expense breakdowns, financial summaries, and advice powered by OpenAI's GPT-3.5-turbo. 
+The app also provides a custom pie chart visualization of expenses, CSV download functionality, 
+and the ability to ask follow-up financial questions.
+Modules:
+- streamlit: For building the web application interface.
+- pandas: For data manipulation and analysis.
+- matplotlib.pyplot: For creating pie chart visualizations.
+- json: For handling JSON data.
+- re: For regular expression operations.
+- io.BytesIO: For handling in-memory file operations.
+- pdf_utils: Custom module for extracting text from PDF files.
+- openai_utils: Custom module for interacting with OpenAI's API.
+Features:
+1. **API Key Input**: Users can securely input their OpenAI API key.
+2. **PDF Upload**: Users can upload multiple bank statement PDFs for analysis.
+3. **Financial Summary and Advice**: Extracts and displays a summary of financial data and advice using OpenAI's API.
+4. **Expense Categorization**: Extracts categorized expenses from the bank statements and ensures valid JSON formatting.
+5. **Expense Breakdown Chart**: Displays a pie chart of categorized expenses with percentage breakdowns.
+6. **CSV Download**: Allows users to download the categorized expense data as a CSV file.
+7. **Follow-up Questions**: Users can ask follow-up financial questions and receive AI-generated responses.
+Functions:
+- `extract_text_from_pdfs(uploaded_files)`: Extracts text from uploaded PDF files.
+- `get_summary_and_advice(text, api_key)`: Generates a financial summary and advice using OpenAI's API.
+- `ask_followup_question(question, api_key)`: Sends a follow-up question to OpenAI's API and retrieves the response.
+Usage:
+1. Enter your OpenAI API key in the provided input field.
+2. Upload one or more bank statement PDFs.
+3. Click "Analyze Statements" to process the uploaded files and view the financial summary and advice.
+4. View the expense breakdown chart and download the data as a CSV file if needed.
+5. Ask follow-up questions for additional insights.
+Error Handling:
+- Handles invalid or missing API keys.
+- Validates and parses JSON data from OpenAI's response.
+- Displays appropriate warnings or error messages for invalid inputs or processing issues.
+Dependencies:
+- Streamlit
+- Pandas
+- Matplotlib
+- OpenAI Python SDK
+- Custom modules: `pdf_utils`, `openai_utils`
+"""
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
