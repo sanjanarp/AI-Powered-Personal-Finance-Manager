@@ -15,19 +15,22 @@ def get_summary_and_advice(pdf_text: str, api_key: str) -> str:
         },
         {"role": "user", "content": f"Please analyze the following bank statements:\n\n{pdf_text}"}
     ]
-    response = openai.ChatCompletion.create(model="gpt-3.5-turbo", messages=messages)
-    return response["choices"][0]["message"]["content"]
+    response = openai.ChatCompletion.create(
+        model="gpt-4",  # Use "gpt-4" or "gpt-3.5-turbo" as appropriate
+        messages=messages
+    )
+    return response.choices[0].message["content"]
 
 def ask_followup_question(question: str, api_key: str) -> str:
     openai.api_key = api_key
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful financial advisor."},
             {"role": "user", "content": question}
         ]
     )
-    return response["choices"][0]["message"]["content"]
+    return response.choices[0].message["content"]
 
 def extract_expense_json(text: str, api_key: str):
     openai.api_key = api_key
@@ -38,13 +41,13 @@ def extract_expense_json(text: str, api_key: str):
     )
 
     response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
+        model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful financial assistant."},
             {"role": "user", "content": prompt}
         ]
     )
-    reply = response["choices"][0]["message"]["content"]
+    reply = response.choices[0].message["content"]
 
     match = re.search(r"\{.*?\}", reply, re.DOTALL)
     if match:

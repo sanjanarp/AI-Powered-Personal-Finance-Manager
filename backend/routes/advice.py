@@ -14,12 +14,20 @@ def summary():
         return jsonify({"error": "Missing files or API key"}), 400
 
     try:
+        print("📄 Extracting text from PDFs...")
         full_text = extract_text_from_pdfs(files)
+        print(f"Extracted text: {full_text[:100]}")  # Log the first 100 characters
+
         MAX_TOKENS = 13000  # GPT-4 safety limit
         trimmed_text = trim_to_token_limit(full_text, max_tokens=MAX_TOKENS)
+        print(f"Trimmed text: {trimmed_text[:100]}")  # Log the first 100 characters
+
         summary = get_summary_and_advice(trimmed_text, api_key)
+        print(f"Generated summary: {summary[:100]}")  # Log the first 100 characters
+
         return jsonify({"summary": summary})
     except Exception as e:
+        print(f"Error in /summary: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 @advice_bp.route("/followup", methods=["POST"])
@@ -34,3 +42,7 @@ def followup():
         return jsonify({"reply": reply})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+@advice_bp.route('/', methods=['GET'])
+def get_advice():
+    return jsonify({"message": "Advice endpoint is working!"}), 200
