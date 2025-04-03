@@ -8,6 +8,9 @@ class TestFrontend(unittest.TestCase):
         mock_post.return_value = MagicMock(status_code=200, json=lambda: {"summary": "Mocked summary"})
 
         # Simulate the backend call
+        # Add logic here to simulate the conditions under which requests.post is called
+        # For example, call the function or method that triggers the POST request
+
         mock_post.assert_called()
 
 if __name__ == "__main__":

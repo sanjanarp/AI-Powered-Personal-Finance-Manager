@@ -15,6 +15,7 @@ cd AI-Powered-Personal-Finance-Manager
 ### 2. Create Virtual Environment (optional but recommended)
 ```bash
 python -m venv venv
+Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
 venv\Scripts\activate       # Windows
 source venv/bin/activate    # macOS/Linux
 ```
@@ -29,15 +30,13 @@ pip install -r requirements.txt
 ### 4. Run the Backend
 Navigate to the `backend` folder and start the Flask server:
 ```bash
-cd backend
-python app.py
+python -m backend.app
 ```
 
 ### 5. Run the Frontend
 In a new terminal, navigate to the `frontend` folder and start the Streamlit app:
 ```bash
-cd frontend
-streamlit run app.py
+streamlit run .\frontend\app.py
 ```
 
 ---
@@ -50,19 +49,13 @@ Before running the tests, ensure the `PYTHONPATH` is set to the project root dir
 set PYTHONPATH=.
 ```
 
-### 2. Run All Tests
-To run all tests, use the following command:
-```bash
-python run_tests.py
-```
-
-### 3. Run Tests with Coverage
+### 2. Run Tests with Coverage
 To run the tests and measure code coverage, use the following command:
 ```bash
 coverage run --source=backend,frontend run_tests.py
 ```
 
-### 4. View Coverage Report
+### 3. View Coverage Report
 To view the coverage report in the terminal:
 ```bash
 coverage report
@@ -83,16 +76,5 @@ Open the `htmlcov/index.html` file in your browser to view a detailed coverage r
 4. Analyze your statements and view the financial insights.
 
 ---
-
-## 🧪 Current Test Coverage
-- **Backend**:
-  - `app.py`: 88%
-  - `routes/advice.py`: 66%
-  - `routes/analyze.py`: 83%
-  - `utils/openai_utils.py`: 56%
-  - `utils/pdf_utils.py`: 53%
-  - `utils/token_utils.py`: 100%
-- **Frontend**:
-  - `app.py`: 0%
 
 > **Note:** Some tests are failing due to issues with mocked dependencies or invalid test data. Refer to the test logs for details.

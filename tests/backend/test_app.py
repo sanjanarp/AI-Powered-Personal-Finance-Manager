@@ -1,11 +1,16 @@
+import sys
+import os
 from io import BytesIO
 import unittest
 from unittest.mock import patch
+
+# Add the project root directory to sys.path
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "../../")))
+
 from backend.app import app
 
 class TestApp(unittest.TestCase):
     def setUp(self):
-        # Set up the test client
         self.app = app.test_client()
         self.app.testing = True
 

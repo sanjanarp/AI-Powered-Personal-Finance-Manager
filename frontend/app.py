@@ -1,10 +1,7 @@
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
-import json
-import re
 import requests
-from io import BytesIO
 
 st.set_page_config(page_title="AI Finance Manager", layout="centered")
 st.title("📊 AI-Powered Personal Finance Manager")
