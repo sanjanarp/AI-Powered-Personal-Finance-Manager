@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
-from ..utils.pdf_utils import extract_text_from_pdfs
-from ..utils.openai_utils import ask_followup_question, get_summary_and_advice
-from ..utils.token_utils import trim_to_token_limit
+from utils.pdf_utils import extract_text_from_pdfs
+from utils.openai_utils import ask_followup_question, get_summary_and_advice
+from utils.token_utils import trim_to_token_limit
 
 advice_bp = Blueprint("advice", __name__)
 
