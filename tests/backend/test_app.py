@@ -9,8 +9,8 @@ class TestApp(unittest.TestCase):
         self.app = app.test_client()
         self.app.testing = True
 
-    @patch("routes.advice.get_summary_and_advice")  # Mock OpenAI API call
-    @patch("routes.advice.extract_text_from_pdfs")  # Mock PDF text extraction
+    @patch("backend.routes.advice.get_summary_and_advice")  # Correct path for advice route
+    @patch("backend.routes.advice.extract_text_from_pdfs")  # Correct path for advice route
     def test_advice_blueprint_summary(self, mock_extract_text, mock_get_summary):
         """
         Test the /advice/summary endpoint with valid inputs.
@@ -53,8 +53,8 @@ class TestApp(unittest.TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertIn("Missing files or API key", response.get_json()["error"])
 
-    @patch("routes.analyze.extract_expense_json")  # Mock OpenAI API call
-    @patch("routes.analyze.extract_text_from_pdfs")  # Mock PDF text extraction
+    @patch("backend.routes.analyze.extract_expense_json")  # Correct path for analyze route
+    @patch("backend.routes.analyze.extract_text_from_pdfs")  # Correct path for analyze route
     def test_analyze_blueprint(self, mock_extract_text, mock_extract_expense):
         """
         Test the /analyze/ endpoint with valid inputs.
