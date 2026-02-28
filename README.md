@@ -200,8 +200,8 @@ These tests will:
 
 ## 👥 Contributors
 - **Harshwardhan Patil** – Frontend, Dashboard, CI/CD, Plaid, OpenAI API.
-- **Sanjana** – Backend Integrations, Alert System.
-- **Matthew** – AI/ML & ChatGPT integration, Automation Testing, Debugging.
+- **Sanjana** – AI/ML & ChatGPT integration, Backend Integrations, Alert System.
+- **Matthew** – Automation Testing, Debugging.
 
 ---
 
