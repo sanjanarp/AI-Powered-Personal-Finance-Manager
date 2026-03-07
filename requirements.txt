@@ -12,3 +12,5 @@ mock
 streamlit_webrtc
 pytest
 playwright
+chromadb>=0.4.0
+tiktoken>=0.5.0

@@ -14,6 +14,14 @@ def categorize_transactions(transactions):
     try:
         client = OpenAI()
         
+        # Filter out deposits, transfers, and credits (negative amounts)
+        _non_spending_cats = {"Deposit", "Transfer", "Income/Credit", "Income", "Refund/Credit"}
+        transactions = [
+            tx for tx in transactions
+            if tx.get("category") not in _non_spending_cats
+            and float(tx.get("amount", 0)) > 0
+        ]
+        
         # Calculate total spending per transaction name
         spending_summary = {}
         for tx in transactions:
@@ -201,8 +209,16 @@ def show_budget_tracker():
             tx.get('source') == 'manual_upload')          # Receipt transactions
     ]
 
+    # Exclude deposits, transfers, and credits from budget tracking
+    _non_spending_cats = {"Deposit", "Transfer", "Income/Credit", "Income", "Refund/Credit"}
+    transactions = [
+        tx for tx in transactions
+        if tx.get("category") not in _non_spending_cats
+        and float(tx.get("amount", 0)) > 0
+    ]
+
     if not transactions:
-        st.warning("No transactions found for selected accounts.")
+        st.warning("No spending transactions found for selected accounts.")
         st.stop()
 
     # Create DataFrame

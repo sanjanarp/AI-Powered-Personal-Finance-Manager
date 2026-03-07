@@ -6,6 +6,40 @@ import streamlit.components.v1 as components
 import pandas as pd
 import json
 
+
+def infer_category(merchant_name: str) -> str:
+    """Infer spending category from merchant/transaction name."""
+    name = str(merchant_name).lower()
+    keyword_map = {
+        "Food & Drink": ["starbucks", "mcdonald", "dunkin", "chipotle", "pizza", "burger",
+                         "taco", "wendy", "chick-fil", "subway", "panera", "grubhub",
+                         "doordash", "uber eats", "postmates", "restaurant", "cafe", "diner",
+                         "bakery", "coffee"],
+        "Transportation": ["uber", "lyft", "gas", "shell", "chevron", "exxon", "bp ",
+                           "parking", "transit", "metro", "amtrak", "fuel"],
+        "Travel": ["airline", "united air", "delta air", "american air", "southwest",
+                   "jetblue", "hotel", "marriott", "hilton", "airbnb", "booking", "expedia"],
+        "Shopping": ["amazon", "walmart", "target", "costco", "best buy", "ebay",
+                     "etsy", "ikea", "home depot", "lowe", "sparkfun"],
+        "Entertainment": ["netflix", "spotify", "hulu", "disney", "apple music",
+                          "youtube", "gaming", "cinema", "movie", "theater"],
+        "Bills & Utilities": ["electric", "water", "internet", "comcast", "verizon",
+                              "at&t", "t-mobile", "utility", "power", "gas bill"],
+        "Healthcare": ["pharmacy", "cvs", "walgreens", "doctor", "hospital", "dental",
+                       "medical", "health"],
+        "Groceries": ["grocery", "trader joe", "whole foods", "safeway", "kroger",
+                      "publix", "aldi", "sprouts"],
+        "Transfer": ["transfer", "zelle", "venmo", "paypal", "wire"],
+        "Payment": ["payment", "pymnt", "credit card", "autopay"],
+        "Deposit": ["deposit", "direct dep", "ach", "gusto", "payroll"],
+        "Interest": ["interest", "intrst"],
+        "Recreation": ["climbing", "touchstone", "gym", "fitness", "sport"],
+    }
+    for category, keywords in keyword_map.items():
+        if any(kw in name for kw in keywords):
+            return category
+    return "Uncategorized"
+
 def process_uploaded_statement(uploaded_file):
     if uploaded_file.type != "text/csv":
         return 0
@@ -192,6 +226,31 @@ def show_add_bank_account():
                     # Add new Plaid transactions
                     st.session_state.all_transactions.extend(plaid_transactions)
                     
+                    # Enrich categories for ALL transactions (single source of truth)
+                    for tx in st.session_state.all_transactions:
+                        # Negative amounts = refunds/credits — NOT spending
+                        amount = float(tx.get("amount", 0))
+                        if amount < 0:
+                            tx["category"] = "Refund/Credit"
+                            continue
+
+                        name_lower = str(tx.get("name", "")).lower()
+                        # Check deposit/transfer keywords FIRST (Plaid often miscategorizes these)
+                        _deposit_kw = ["deposit", "direct dep", "ach", "payroll", "gusto"]
+                        _transfer_kw = ["transfer", "zelle", "venmo", "paypal", "wire"]
+                        if any(kw in name_lower for kw in _deposit_kw):
+                            tx["category"] = "Deposit"
+                        elif any(kw in name_lower for kw in _transfer_kw):
+                            tx["category"] = "Transfer"
+                        else:
+                            # Use infer_category for everything else
+                            raw_cat = tx.get("category")
+                            if not raw_cat or raw_cat is None or (isinstance(raw_cat, list) and not raw_cat):
+                                tx["category"] = infer_category(tx.get("name", ""))
+                            elif isinstance(raw_cat, list) and raw_cat:
+                                tx["category"] = raw_cat[0] if raw_cat[0] else infer_category(tx.get("name", ""))
+                            # If it's already a valid string, keep it
+
                     # Update the main transactions list
                     st.session_state.transactions = st.session_state.all_transactions.copy()
                     
@@ -213,13 +272,32 @@ def show_add_bank_account():
                                     "name": name
                                 }
 
+                    # Resolve category with same logic as Insights page
+                    def resolve_category_for_tx(tx):
+                        amount = float(tx.get("amount", 0))
+                        if amount < 0:
+                            return "Refund/Credit"
+                        name_lower = str(tx.get("name", "")).lower()
+                        _dep_kw = ["deposit", "direct dep", "ach", "payroll", "gusto"]
+                        _xfr_kw = ["transfer", "zelle", "venmo", "paypal", "wire"]
+                        if any(kw in name_lower for kw in _dep_kw):
+                            return "Deposit"
+                        if any(kw in name_lower for kw in _xfr_kw):
+                            return "Transfer"
+                        cat = tx.get("category")
+                        if isinstance(cat, list) and cat:
+                            return cat[0] if cat[0] else infer_category(tx.get("name", ""))
+                        if isinstance(cat, str) and cat and cat not in ("Uncategorized", "None", "null"):
+                            return cat
+                        return infer_category(tx.get("name", ""))
+
                     # Build final table
                     table = [
                         {
                             "Date": pd.to_datetime(tx["date"], errors="coerce").strftime("%Y-%m-%d") if tx.get("date") else "",
                             "Name": tx["name"],
                             "Amount ($)": tx["amount"],
-                            "Category": ", ".join(tx.get("category", [])) if isinstance(tx.get("category"), list) else tx.get("category", "Uncategorized"),
+                            "Category": resolve_category_for_tx(tx),
                             "Account": (
                                 f"{account_info_map[tx['account_id']]['institution']} – {account_info_map[tx['account_id']]['type']} ({account_info_map[tx['account_id']]['mask']})"
                                 if tx.get("account_id") in account_info_map else "Manual Upload – Receipt Transactions"

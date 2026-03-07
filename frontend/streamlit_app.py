@@ -192,6 +192,84 @@ if status:
         st.info("ℹ️ Bank linking was cancelled.")
         st.session_state["current_page"] = "add_bank"
 
+# ──────────────────────────────────────────────────────────────────────────────
+# CENTRALIZED CATEGORY ENRICHMENT — runs on every rerun, before any page loads.
+# This is the single source of truth for transaction categories.
+# ──────────────────────────────────────────────────────────────────────────────
+def _enrich_session_transactions():
+    """Fix categories on ALL transactions in session_state, in-place."""
+    tx_lists = []
+    if "transactions" in st.session_state:
+        tx_lists.append(st.session_state["transactions"])
+    if "all_transactions" in st.session_state:
+        tx_lists.append(st.session_state["all_transactions"])
+        
+    if not tx_lists:
+        return
+
+    _dep_kw = ["deposit", "direct dep", "ach", "payroll", "gusto"]
+    _xfr_kw = ["transfer", "zelle", "venmo", "paypal", "wire"]
+    _kw_map = {
+        "Food & Drink": ["starbucks", "mcdonald", "dunkin", "chipotle", "pizza", "burger",
+                         "taco", "wendy", "chick-fil", "subway", "panera", "grubhub",
+                         "doordash", "uber eats", "postmates", "restaurant", "cafe", "diner",
+                         "bakery", "coffee"],
+        "Transportation": ["uber", "lyft", "gas", "shell", "chevron", "exxon", "bp ",
+                           "parking", "transit", "metro", "amtrak", "fuel"],
+        "Travel": ["airline", "united air", "delta air", "american air", "southwest",
+                   "jetblue", "hotel", "marriott", "hilton", "airbnb", "booking", "expedia"],
+        "Shopping": ["amazon", "walmart", "target", "costco", "best buy", "ebay",
+                     "etsy", "ikea", "home depot", "lowe", "sparkfun"],
+        "Entertainment": ["netflix", "spotify", "hulu", "disney", "apple music",
+                          "youtube", "gaming", "cinema", "movie", "theater"],
+        "Bills & Utilities": ["electric", "water", "internet", "comcast", "verizon",
+                              "at&t", "t-mobile", "utility", "power", "gas bill"],
+        "Healthcare": ["pharmacy", "cvs", "walgreens", "doctor", "hospital", "dental",
+                       "medical", "health"],
+        "Groceries": ["grocery", "trader joe", "whole foods", "safeway", "kroger",
+                      "publix", "aldi", "sprouts"],
+        "Payment": ["payment", "pymnt", "credit card", "autopay"],
+        "Interest": ["interest", "intrst"],
+        "Recreation": ["climbing", "touchstone", "gym", "fitness", "sport"],
+    }
+
+    for txs in tx_lists:
+        for tx in txs:
+            try:
+                amount = float(tx.get("amount", 0))
+            except (ValueError, TypeError):
+                amount = 0
+            name_lower = str(tx.get("name", "")).lower()
+
+            # Priority 1: negative amounts are refunds/credits
+            if amount < 0:
+                tx["category"] = "Refund/Credit"
+                continue
+            # Priority 2: deposit keywords in name
+            if any(kw in name_lower for kw in _dep_kw):
+                tx["category"] = "Deposit"
+                continue
+            # Priority 3: transfer keywords in name
+            if any(kw in name_lower for kw in _xfr_kw):
+                tx["category"] = "Transfer"
+                continue
+            # Priority 4: existing valid category string
+            cat = tx.get("category")
+            if isinstance(cat, list) and cat:
+                tx["category"] = cat[0] if cat[0] else None
+                cat = tx["category"]
+            if isinstance(cat, str) and cat and cat not in ("Uncategorized", "None", "null", ""):
+                continue
+            # Priority 5: infer from merchant name
+            matched = "Uncategorized"
+            for cat_name, keywords in _kw_map.items():
+                if any(kw in name_lower for kw in keywords):
+                    matched = cat_name
+                    break
+            tx["category"] = matched
+
+_enrich_session_transactions()
+
 # Page rendering based on session state
 # Lazy loading: only import the view when needed
 if st.session_state["current_page"] == "home":
